@@ -13,7 +13,7 @@ if [[ $selection == "1" ]]; then
     app=$(echo -e "$list" | grep ^"$selection " | awk '{print $2}' | cut -c 4- )
     [[ -z "$app" ]] && echo "Invalid Selection: $selection, was not an option" && exit #Check for valid selection. If none, kill script
     pvc=$(echo -e "$list" | grep ^"$selection ")
-    status=$(cli -m csv -c 'app chart_release query name,status' | grep -E "^$app\b" | awk -F ',' '{print $2}'| tr -d " \t\n\r")
+    status=$(cli -m csv -c 'app chart_release query name,status' | grep -E "^$app\," | awk -F ',' '{print $2}'| tr -d " \t\n\r")
     if [[ "$status" != "STOPPED" ]]; then
         [[ -z $timeout ]] && echo -e "\nDefault Timeout: 500" && timeout=500 || echo -e "\nCustom Timeout: $timeout"
         SECONDS=0 && echo -e "\nScaling down $app" && midclt call chart.release.scale "$app" '{"replica_count": 0}' &> /dev/null
