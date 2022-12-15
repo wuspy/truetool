@@ -6,7 +6,7 @@ dir=$(basename "$SCRIPT_DIR")
 
 # Change this if you want to fork the project
 enableUpdate="true"
-targetRepo="https://github.com/truecharts/truetool.git"
+targetRepo="https://github.com/wuspy/truetool.git"
 
 # CD to the folder containing the script to ensure consistent runs
 cd "${SCRIPT_DIR}" || echo -e "ERROR: Something went wrong accessing the script directory"
