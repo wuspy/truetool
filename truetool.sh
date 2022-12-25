@@ -22,6 +22,8 @@ source includes/colors.sh
 source includes/dns.sh
 # shellcheck source=includes/help.sh
 source includes/help.sh
+# shellcheck source=includes/help.sh
+source includes/patch.sh
 # shellcheck source=includes/mount.sh
 source includes/mount.sh
 # shellcheck source=includes/no_args.sh
@@ -133,6 +135,9 @@ title
 if [[ "$no_args" == "true"  ]]; then
   no_args
 fi
+
+## Always check if a hotpatch needs to be applied
+hotpatch
 
 ## Exit if incompatable functions are called
 [[ "$update_all_apps" == "true" && "$update_apps" == "true" ]] && echo -e "-U and -u cannot BOTH be called" && exit
