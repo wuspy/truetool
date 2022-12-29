@@ -25,18 +25,36 @@ export -f kubeapiEnable
 
 # Prune unused docker images to prevent dataset/snapshot bloat related slowdowns on SCALE
 prune(){
-echo -e "${BWhite}Docker Prune${Color_Off}"
-echo "Pruning Docker Images..."
-docker image prune -af | grep "^Total" && echo -e "${IGreen}Docker Prune Successfull${Color_Off}" || echo "Docker Prune ${IRed}FAILED${Color_Off}"
-
-# TODO Switch to middleware prune on next release
-# midclt call container.prune '{"remove_unused_images": true, "remove_stopped_containers": true}' &> /dev/null && echo "Docker Prune completed"|| echo "Docker Prune ${IRed}FAILED${Color_Off}"
+echo -e "🄿 🅁 🅄 🄽 🄴"
+if (( "$scaleVersion" >= 22120 )); then
+  cli -c 'app container config prune prune_options={"remove_unused_images": true, "remove_stopped_containers": true}' | head -n -4 || echo "Failed to Prune Docker Images"
+else
+  docker image prune -af | grep "^Total" || echo "Failed to Prune Docker Images"
+fi
 }
 export -f prune
 
-#
+middlewareRestart() {
+  echo "We need to restart middlewared."
+  echo "This will cause a short downtime for the webui approximately 10-30 seconds"
+  echo "Restarting middlewared"
+  service middlewared restart &
+  wait $!
+  echo "Restarted middlewared"
+}
+export -f middlewareRestart
+
+
 sync(){
-echo -e "${BWhite}Starting Catalog Sync...${Color_Off}"
-cli -c 'app catalog sync_all' &> /dev/null && echo -e "${IGreen}Catalog sync complete${Color_Off}" || echo -e "${IRed}Catalog Sync Failed${Color_Off}"
+echo_sync+=("🅂 🅈 🄽 🄲")
+cli -c 'app catalog sync_all' &> /dev/null && echo_sync+=("Catalog sync complete")
+
+#Dump the echo_array, ensures all output is in a neat order.
+for i in "${echo_sync[@]}"
+do
+    echo -e "$i"
+done
+echo
+echo
 }
 export -f sync

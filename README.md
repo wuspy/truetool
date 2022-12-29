@@ -2,7 +2,7 @@
 
 An easy tool for frequently used TrueNAS SCALE CLI utilities.
 
-Please before using this tool, [read this note](https://truecharts.org/docs/manual/SCALE%20Apps/Important-MUST-READ)
+Please before using this tool, [read this note](https://truecharts.org/manual/guides/Important-MUST-READ)
 
 ## Table of contents:
 
@@ -47,6 +47,16 @@ It also offers a few handy shortcuts for commonly required chores, like: Enablin
 <br>
 
 ## How to Install
+
+### oneliner
+
+```
+curl -s https://raw.githubusercontent.com/truecharts/truetool/main/bootstrap | bash
+```
+
+You can now use truetool anywhere `truetool -ARGUMENTS`
+
+## Manual Install
 
 ### Choose a folder
 
@@ -123,9 +133,12 @@ Then Support-Manager for TrueCharts, HeavyBullets8, ported this to Bash and star
 
 After a month or so, the TrueCharts Team officially started refactoring this expanded bash-port. Due to personal reasons, HeavyBullets by then decided to separate from TrueCharts after merging the TrueCharts refactor into his own work. The beauty of OpenSource.
 
-From this point onwards the HeavyScript and TrueTool diverged a bit.
+From this point onwards the HeavyScript and TrueTool diverged a bit. Development of TrueTool slowed down a bit during Q3 of 2022 and HeavyScript significantly improved on the reliability of primary features while also adding some of it's own.
+
+While previously HeavyScript and TrueTool shared a lot of code back-and-forth without much care to attribution, we've decided to more officially attribute and start using functions with all the HeavyScript improvements in-place for some of the primary features like: Backup, Restore and App-Updates. Cleanly seperating those from TrueCharts features that have neglitable involvement of HeavyScript.
+
+Users from HeavyScript should be able to safely start using TrueTool, as we've made precautions to ensure the backups take over smoothly.
+We, however, do _not_ advise using HeavyScript with TrueCharts Apps. Not because it's a bad App, but because we offer an alternative that is validated by our Staff.
+
 We internally review changes within our staff team, to verify we somewhat stick to best-practices. This means, in some cases, we decided not to port certain features from HeavyScript and did decide to add features we think are useful and safe.
 But this also means we can give guarantees TrueTool works optimally with our Catalog of TrueNAS SCALE Apps, as well as official Apps.
-
-Users from HeavyScript can safely start using TrueTool, as we've made precautions to ensure the backups take over smoothly.
-We, however, do _not_ advise using HeavyScript with TrueCharts Apps. Not because it's a bad App, but because we offer an alternative that is validated by our Staff.

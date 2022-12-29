@@ -12,28 +12,31 @@ targetRepo="https://github.com/wuspy/truetool.git"
 cd "${SCRIPT_DIR}" || echo -e "ERROR: Something went wrong accessing the script directory"
 
 # Includes
-# shellcheck source=includes/backup.sh
-source includes/backup.sh
 # shellcheck source=includes/chores.sh
 source includes/chores.sh
-# shellcheck source=includes/colors.sh
-source includes/colors.sh
-# shellcheck source=includes/dns.sh
-source includes/dns.sh
 # shellcheck source=includes/help.sh
 source includes/help.sh
 # shellcheck source=includes/help.sh
 source includes/patch.sh
-# shellcheck source=includes/mount.sh
-source includes/mount.sh
 # shellcheck source=includes/no_args.sh
 source includes/no_args.sh
 # shellcheck source=includes/title.sh
 source includes/title.sh
-# shellcheck source=includes/update.sh
-source includes/update.sh
 # shellcheck source=includes/update_self.sh
 source includes/update_self.sh
+# shellcheck source=includes/backup.sh
+source includes/backup.sh
+
+# Libraries loaded from Heavyscript
+# shellcheck source=functions/dns.sh
+source functions/dns.sh
+# shellcheck source=functions/mount.sh
+source functions/mount.sh
+# shellcheck source=functions/backup.sh
+source functions/backup.sh
+# shellcheck source=functions/update_apps.sh
+source functions/update_apps.sh
+
 
 #If no argument is passed, set flag to show menu
 if [[ -z "$*" || "-" == "$*" || "--" == "$*"  ]]; then
@@ -74,7 +77,7 @@ else
                   kubeapiEnable="true"
                   ;;
             no-color)
-                  noColor
+                  echo "Colors are removed, so the no-color option is depricated. Please stop using this"
                   ;;
             *)
                   echo -e "Invalid Option \"--$OPTARG\"\n" && help
@@ -131,13 +134,17 @@ title
 
 [[ "$enableUpdate" == "true" ]] && updater "$@"
 
+scaleVersion=$(cli -c 'system version' | awk -F '-' '{print $3}' | awk -F '.' '{print $1 $2 $3}' |  tr -d " \t\r\.")
+update_limit=$(nproc --all)
+rollback="true"
+
+## Always check if a hotpatch needs to be applied
+hotpatch
+
 # Show menu if menu flag is set
 if [[ "$no_args" == "true"  ]]; then
   no_args
 fi
-
-## Always check if a hotpatch needs to be applied
-hotpatch
 
 ## Exit if incompatable functions are called
 [[ "$update_all_apps" == "true" && "$update_apps" == "true" ]] && echo -e "-U and -u cannot BOTH be called" && exit
@@ -172,8 +179,22 @@ hotpatch
 [[ "$deleteBackup" == "true" ]] && deleteBackup && exit
 [[ "$dns" == "true" ]] && dns && exit
 [[ "$restore" == "true" ]] && restore && exit
-[[ "$mountPVC" == "true" ]] && mountPVC && exit
-[[ "$number_of_backups" -ge 1 ]] && backup
-[[ "$sync" == "true" ]] && sync
-[[ "$update_all_apps" == "true" || "$update_apps" == "true" ]] && update_apps
+[[ "$mountPVC" == "true" ]] && mount && exit
+if [[ "$number_of_backups" -gt 1 && "$sync" == "true" ]]; then # Run backup and sync at the same time
+    echo "Running Apps Backup & Syncing Catalog"
+    if [[ "$prune" == "true" ]]; then
+      prune &
+    fi
+    backup &
+    sync &
+    wait
+elif [[ "$number_of_backups" -gt 1 && -z "$sync" ]]; then # If only backup is true, run it
+    echo "Running Apps Backup"
+    backup
+elif [[ "$sync" == "true" && -z "$number_of_backups" ]]; then # If only sync is true, run it
+    echo "Syncing Catalog"
+    echo -e "Syncing Catalog(s)\n\n"
+    sync
+fi
+[[ "$update_all_apps" == "true" || "$update_apps" == "true" ]] && commander
 [[ "$prune" == "true" ]] && prune
